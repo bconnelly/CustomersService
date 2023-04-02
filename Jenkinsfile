@@ -44,26 +44,20 @@ pipeline{
 	            '''
             }
         }
-        stage('deploy services to cluster'){
+        stage('deploy services to cluster - rc namespace'){
             steps{
                 script{
-                    sh 'git clone https://github.com/bconnelly/Restaurant-k8s-components.git'
-
-                    def fileString = sh(script: 'find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/.git -prune -o -name *.yaml -print', returnStdout: true)
-                    echo fileString
-                    def files = fileString.split("\n")
-                    for(file in files){
-                        sh 'yq e \'.metadata.namespace = \"dev\"\' ' + file
-                    }
-
                     sh '''
+                        git clone https://github.com/bconnelly/Restaurant-k8s-components.git
+
+                        find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "rc"' $line > /dev/null; done
+                        yq -i '.metadata.namespace = "rc"' /root/jenkins/restaurant-resources/fullstack-secrets.yaml > /dev/null
+
                         kubectl apply -f /root/jenkins/restaurant-resources/fullstack-secrets.yaml
-                        kubectl apply -f Restaurant-k8s-components/
                         kubectl apply -f Restaurant-k8s-components/customers
                         kubectl get deployment
                         kubectl rollout restart deployment customers-deployment
-                    '''
-                    sh '''
+
                         if [ -z "$(kops validate cluster | grep ".k8s.local is ready")" ]; then exit 1; fi
                     '''
                 }
@@ -92,13 +86,24 @@ pipeline{
                 }
             }
         }
-//         stage('cleanup'){
-//             steps{
-//                 script{
-//
-//                 }
-//             }
-//         }
+        stage('deploy to cluster - prod namespace'){
+            steps{
+                unstash 'k8s-components'
+
+                sh '''
+                    find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "prod"' $line > /dev/null; done
+                    yq -i '.metadata.namespace = "prod"' /root/jenkins/restaurant-resources/fullstack-secrets.yaml > /dev/null
+
+                    kubectl config set-context --current --namespace prod
+                    kubectl apply -f /root/jenkins/restaurant-resources/fullstack-secrets.yaml
+                    kubectl apply -f Restaurant-k8s-components/customers/
+                    kubectl get deployment
+                    kubectl rollout restart deployment customers-deployment
+
+                    if [ -z "$(kops validate cluster | grep ".k8s.local is ready")" ]; then exit 1; fi
+                '''
+            }
+        }
     }
     post{
         always{
