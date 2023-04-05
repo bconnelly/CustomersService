@@ -106,7 +106,7 @@ pipeline{
                 unstash 'k8s-components'
 
                 sh '''
-                    find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/tables -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "prod"' $line > /dev/null; done
+                    find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/customers -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "prod"' $line > /dev/null; done
                     yq -i '.metadata.namespace = "prod"' /root/jenkins/restaurant-resources/fullstack-secrets.yaml > /dev/null
                     yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/fullstack-config.yaml > /dev/null
                     yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/mysql-external-service.yaml > /dev/null
@@ -124,7 +124,7 @@ pipeline{
     }
     post{
         failure{
-            unstash 'tables-repo'
+            unstash 'customers-repo'
             withCredentials([gitUsernamePassword(credentialsId: 'GITHUB_USERPASS', gitToolName: 'Default')]) {
                 sh '''
                     git checkout rc
