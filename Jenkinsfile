@@ -29,7 +29,7 @@ pipeline{
                     cp /root/jenkins/restaurant-resources/tomcat-users.xml .
                     cp /root/jenkins/restaurant-resources/context.xml .
                     cp /root/jenkins/restaurant-resources/server.xml .
-                    cp target/CustomersService.war
+                    cp target/CustomersService.war .
 
                     docker build -t bryan949/fullstack-customers .
                     docker push bryan949/fullstack-customers:latest
@@ -72,7 +72,7 @@ pipeline{
         }
         stage('integration testing'){
             steps{
-                unstash 'tables-repo'
+                unstash 'customers-repo'
                 sh '''
                     export LOAD_BALANCER="a886fa07e7d52403b85d9b8e2b9f6966-682684080.us-east-1.elb.amazonaws.com"
                     export SERVICE_PATH="RestaurantService"
