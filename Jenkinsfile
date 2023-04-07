@@ -68,7 +68,7 @@ pipeline{
                 stash includes: 'Restaurant-k8s-components/customers/', name: 'k8s-components'
             }
         }
-        stage('integration testing'){
+        stage('end-to-end tests'){
             steps{
                 unstash 'customers-repo'
                 sh '''
