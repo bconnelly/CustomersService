@@ -29,7 +29,6 @@ pipeline{
                     cp /root/jenkins/restaurant-resources/tomcat-users.xml .
                     cp /root/jenkins/restaurant-resources/context.xml .
                     cp /root/jenkins/restaurant-resources/server.xml .
-                    cp target/CustomersService.war .
 
                     docker build -t bryan949/fullstack-customers .
                     docker push bryan949/fullstack-customers:latest
