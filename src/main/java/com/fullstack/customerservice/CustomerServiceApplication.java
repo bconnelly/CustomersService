@@ -2,6 +2,7 @@ package com.fullstack.customerservice;
 
 import com.fullstack.customerservice.DBAccessEntities.Customer;
 import com.fullstack.customerservice.DomainLogic.CustomerLogic;
+import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -32,33 +33,19 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 
 	@GetMapping(path = "/getAllCustomers")
 	public ResponseEntity<List<Customer>> getAllCustomers(){
-		try{
-			return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getAllCustomers());
-		}catch(RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
+		log.debug("getAllCustomers requested");
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getAllCustomers());
 	}
 
 	@GetMapping(path = "/getCustomerByFirstName")
-	public ResponseEntity<Customer> getCustomerByFirstName(String firstName){
-		try{
-			log.debug("getCustomerByFirstName requested");
-			Optional<Customer> customerReturned = customerLogic.getCustomerByFirstName(firstName);
-
-			if(customerReturned.isPresent()) return ResponseEntity.status(HttpStatus.OK).body(customerReturned.get());
-			else return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		} catch(RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
+	public ResponseEntity<Customer> getCustomerByFirstName(String firstName) throws EntityNotFoundException {
+		log.debug("getCustomerByFirstName requested");
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomerByFirstName(firstName));
 	}
 
 	@GetMapping(path = "/customerExists")
 	public ResponseEntity<Boolean> customerExists(String firstName){
-		try{
-			return ResponseEntity.status(HttpStatus.OK).body(customerLogic.customerExists(firstName));
-		} catch (RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.customerExists(firstName));
 	}
 
 	@PostMapping(path = "/insertCustomer")
@@ -66,39 +53,25 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 												   @RequestParam(value = "address")String address,
 												   @RequestParam(value = "cash")Float cash,
 												   @RequestParam(value = "tableNumber")Integer tableNumber){
-		try{
-			return ResponseEntity.status(HttpStatus.OK).body(customerLogic.insertCustomer(firstName, address, cash, tableNumber));
-		} catch (RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.insertCustomer(firstName, address, cash, tableNumber));
+
 
 	}
 
 	@PostMapping(path = "/bootCustomer")
 	public ResponseEntity<Customer> bootCustomer(@RequestParam(value = "firstName") String firstName){
 
-		try{
-			if(customerLogic.bootByFirstName(firstName)){
-				return ResponseEntity.status(HttpStatus.OK).body(null);
-			}else{
-				throw new RuntimeException("Entity still exists after deletion attempt");
-			}
-		} catch (RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
+			if(customerLogic.bootByFirstName(firstName)) return ResponseEntity.status(HttpStatus.OK).body(null);
+			else throw new RuntimeException("Entity still exists after deletion attempt");
 	}
 
 	@GetMapping(path = "/getCustomerAtTable")
 	public ResponseEntity<List<Customer>> getCustomerAtTable(@RequestParam(value = "tableNumber") Integer tableNumber){
 		Optional<List<Customer>> customersReturned;
+		customersReturned = customerLogic.getCustomersAtTable(tableNumber);
+		return customersReturned.map(customers -> ResponseEntity.status(HttpStatus.OK).body(customers)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
 
-		try{
-			customersReturned = customerLogic.getCustomersAtTable(tableNumber);
-			return customersReturned.map(customers -> ResponseEntity.status(HttpStatus.OK).body(customers)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
-
-		} catch (RuntimeException e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
 	}
 
 }

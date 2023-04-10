@@ -2,6 +2,7 @@ package com.fullstack.customerservice.DomainLogic;
 
 import com.fullstack.customerservice.DBAccessEntities.Customer;
 import com.fullstack.customerservice.Repositories.CustomerRepository;
+import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,12 +27,10 @@ public class CustomerLogic {
         return customerRepository.existsByFirstName(firstName);
     }
 
-    public Optional<Customer> getCustomerByFirstName(String firstName){
-        log.debug("at getCustomerByFirstName. firstName: " + firstName);
+    public Customer getCustomerByFirstName(String firstName) throws EntityNotFoundException {
         Optional<Customer> ret = customerRepository.getCustomerByFirstName(firstName);
-        log.debug("returned: " + ret);
-        log.debug("Present: " + ret.isPresent());
-        return ret;
+        if(ret.isEmpty()) throw new EntityNotFoundException("customer not found");
+        else return ret.get();
     }
 
     public Customer insertCustomer(String firstName, String address, Float cash, Integer tableNumber){
