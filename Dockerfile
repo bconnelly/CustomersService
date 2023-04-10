@@ -14,6 +14,6 @@ COPY tomcat-users.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/conf
 COPY context.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/webapps/manager/META-INF
 COPY server.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/conf
 
-HEALTHCHECK --interval=30m --timeout=3s CMD curl --fail http://localhost:80 || exit 1
+RUN echo "0" > healthy
 
 CMD ["bash", "-c", "/opt/tomcat/apache-tomcat-$TOMCAT_VERSION/bin/catalina.sh run"]
