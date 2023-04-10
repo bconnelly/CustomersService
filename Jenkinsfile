@@ -66,12 +66,14 @@ pipeline{
                     if [ -z "$(kops validate cluster | grep ".k8s.local is ready")" ]; then echo "failed to deploy to rc namespace" && exit 1; fi
                 '''
                 stash includes: 'Restaurant-k8s-components/customers/', name: 'k8s-components'
+                stach includes: 'Restaurant-k8s-components/tests.py', name: 'tests'
             }
         }
         stage('end-to-end tests'){
             steps{
-                unstash 'customers-repo'
+                unstash 'tests'
                 sh '''
+                    ls -alF
                     python tests.py
                     exit_status=$?
                     if [ "${exit_status}" -ne 0 ];
