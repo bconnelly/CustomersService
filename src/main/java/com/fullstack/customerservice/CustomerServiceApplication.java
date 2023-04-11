@@ -60,7 +60,7 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@PostMapping(path = "/bootCustomer")
-	public ResponseEntity<Customer> bootCustomer(@RequestParam(value = "firstName") String firstName){
+	public ResponseEntity<Customer> bootCustomer(@RequestParam(value = "firstName") String firstName) throws EntityNotFoundException {
 
 			if(customerLogic.bootByFirstName(firstName)) return ResponseEntity.status(HttpStatus.OK).body(null);
 			else throw new RuntimeException("Entity still exists after deletion attempt");

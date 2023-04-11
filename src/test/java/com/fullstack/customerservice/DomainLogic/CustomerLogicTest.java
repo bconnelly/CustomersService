@@ -1,31 +1,44 @@
 package com.fullstack.customerservice.DomainLogic;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.fullstack.customerservice.DBAccessEntities.Customer;
-import com.fullstack.customerservice.Repositories.CustomerRepository;
-import org.junit.jupiter.api.BeforeAll;
+import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.util.ReflectionTestUtils;
+import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CustomerLogicTest {
 
     @Autowired
     private CustomerLogic customerLogic;
 
-    @Mock
-    private CustomerRepository customerRepository;
+    @Test
+    void getAllCustomersTest(){
+        List<Customer> returnedCustomers = customerLogic.getAllCustomers();
+        assert(returnedCustomers.get(0).getFirstName().equals("alice"));
+        assert(returnedCustomers.get(1).getFirstName().equals("bob"));
+        assert(returnedCustomers.get(2).getFirstName().equals("chuck"));
+        assert(returnedCustomers.get(3).getFirstName().equals("dave"));
+        assert(returnedCustomers.get(4).getFirstName().equals("ed"));
+    }
 
-    @BeforeAll
-    void setup(){
-        ReflectionTestUtils.setField(customerLogic, "customerRepository", customerRepository);
+    @Test
+    void customerExistsTest(){
+        assert customerLogic.customerExists("chuck");
+        assert !customerLogic.customerExists("zach");
+    }
+
+    @Test
+    void getCustomerByFirstNameTest() throws EntityNotFoundException {
+        Customer expecterCustomer = Customer.builder().firstName("bob").address("124 main st").tableNumber(3).cash(2.34f).build();
+        Customer returnedCustomer = customerLogic.getCustomerByFirstName("bob");
+        assert expecterCustomer.equals(returnedCustomer);
+
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("zach"));
     }
 
     @Test
@@ -33,13 +46,23 @@ public class CustomerLogicTest {
         Customer customerToSave = Customer.builder().firstName("alice").address("test address1")
                 .cash(12.34f).tableNumber(1).build();
 
-        when(customerRepository.save(any(Customer.class))).thenReturn(customerToSave);
-
         Customer returnedCustomer = customerLogic.insertCustomer(
-                "alice", "test address1", 12.34f, 1);
+                customerToSave.getFirstName(), customerToSave.getAddress(), 12.34f, 1);
 
         assert(customerToSave.equals(returnedCustomer));
-        verify(customerRepository, times(1)).save(any(Customer.class));
     }
 
+    @Test
+    void bootByFirstNameTest() throws EntityNotFoundException {
+        assert(customerLogic.bootByFirstName("ed"));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
+    }
+
+    @Test
+    void getCustomersAtTableTest(){
+        Optional<List<Customer>> expected =
+                customerLogic.getCustomersAtTable(1);
+
+
+    }
 }
