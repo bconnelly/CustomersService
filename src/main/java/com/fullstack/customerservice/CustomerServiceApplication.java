@@ -55,13 +55,10 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 												   @RequestParam(value = "tableNumber")Integer tableNumber){
 
 		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.insertCustomer(firstName, address, cash, tableNumber));
-
-
 	}
 
 	@PostMapping(path = "/bootCustomer")
 	public ResponseEntity<Customer> bootCustomer(@RequestParam(value = "firstName") String firstName) throws EntityNotFoundException {
-
 			if(customerLogic.bootByFirstName(firstName)) return ResponseEntity.status(HttpStatus.OK).body(null);
 			else throw new RuntimeException("Entity still exists after deletion attempt");
 	}
@@ -71,7 +68,6 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 		Optional<List<Customer>> customersReturned;
 		customersReturned = customerLogic.getCustomersAtTable(tableNumber);
 		return customersReturned.map(customers -> ResponseEntity.status(HttpStatus.OK).body(customers)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
-
 	}
 
 }

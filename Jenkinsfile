@@ -69,7 +69,7 @@ pipeline{
                 stash includes: 'Restaurant-k8s-components/tests.py', name: 'tests'
             }
         }
-        stage('end-to-end tests'){
+        stage('sanity tests'){
             steps{
                 unstash 'tests'
                 sh '''
