@@ -119,7 +119,7 @@ pipeline{
                     steps{
                         unstash 'tests'
                         sh '''
-                            python Restaurant-k8s-components/tests.py ${MASTER_LB}
+                            python Restaurant-k8s-components/tests.py ${PROD_LB}
                             exit_status=$?
                             if [ "${exit_status}" -ne 0 ];
                             then
