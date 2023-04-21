@@ -15,7 +15,7 @@ public class CustomerExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> entityNotFoundHandler(EntityNotFoundException exception){
         log.error(exception.getCause() + ", " + exception.getMessage());
         if(exception.getMessage().isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("entity not found");
-        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getCause() + ", " + exception.getMessage());
+        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getCause() + ", entity not found | " + exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
