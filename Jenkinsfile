@@ -149,11 +149,6 @@ pipeline{
             }
         }
         always{
-            script{
-                sh 'docker rmi bryan949/poc-customers'
-                sh 'docker image prune'
-            }
-
             cleanWs(cleanWhenAborted: true,
                     cleanWhenFailure: true,
                     cleanWhenNotBuilt: true,
@@ -161,8 +156,12 @@ pipeline{
                     cleanWhenUnstable: true,
                     cleanupMatrixParent: true,
                     deleteDirs: true,
-                    disableDeferredWipeout: true
-            )
+                    disableDeferredWipeout: true)
+
+            script{
+                sh 'docker rmi bryan949/poc-customers'
+                sh 'docker image prune'
+            }
         }
     }
 }
