@@ -150,7 +150,7 @@ pipeline{
         }
         always{
             script{
-                sh 'docker rmi bryan949/fullstack-customers'
+                sh 'docker rmi bryan949/poc-customers'
                 sh 'docker image prune'
             }
 
