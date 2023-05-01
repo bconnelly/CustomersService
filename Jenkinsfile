@@ -57,11 +57,11 @@ pipeline{
                     git clone https://github.com/bconnelly/Restaurant-k8s-components.git
 
                     find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/customers -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "rc"' $line > /dev/null; done
-                    yq -i '.metadata.namespace = "rc"' /root/jenkins/restaurant-resources/fullstack-secrets.yaml > /dev/null
-                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/fullstack-config.yaml > /dev/null
+                    yq -i '.metadata.namespace = "rc"' /root/jenkins/restaurant-resources/poc-secrets.yaml > /dev/null
+                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/poc-config.yaml > /dev/null
                     yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/mysql-external-service.yaml > /dev/null
 
-                    kubectl apply -f /root/jenkins/restaurant-resources/fullstack-secrets.yaml
+                    kubectl apply -f /root/jenkins/restaurant-resources/poc-secrets.yaml
                     kubectl apply -f Restaurant-k8s-components/customers
                     kubectl get deployment
                     kubectl rollout restart deployment customers-deployment
@@ -102,12 +102,12 @@ pipeline{
 
                 sh '''
                     find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/customers -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "prod"' $line > /dev/null; done
-                    yq -i '.metadata.namespace = "prod"' /root/jenkins/restaurant-resources/fullstack-secrets.yaml > /dev/null
-                    yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/fullstack-config.yaml > /dev/null
+                    yq -i '.metadata.namespace = "prod"' /root/jenkins/restaurant-resources/poc-secrets.yaml > /dev/null
+                    yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/poc-config.yaml > /dev/null
                     yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/mysql-external-service.yaml > /dev/null
 
                     kubectl config set-context --current --namespace prod
-                    kubectl apply -f /root/jenkins/restaurant-resources/fullstack-secrets.yaml
+                    kubectl apply -f /root/jenkins/restaurant-resources/poc-secrets.yaml
                     kubectl apply -f Restaurant-k8s-components/customers/
                     kubectl get deployment
                     kubectl rollout restart deployment customers-deployment
