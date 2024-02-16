@@ -6,6 +6,7 @@ import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -35,10 +36,10 @@ public class CustomerLogicTest {
     @Test
     void getCustomerByFirstNameTest() throws EntityNotFoundException {
         Customer expecterCustomer = Customer.builder().firstName("bob").address("124 main st").tableNumber(3).cash(2.34f).build();
-        Customer returnedCustomer = customerLogic.getCustomerByFirstName("bob");
+        Customer returnedCustomer = customerLogic.getCustomersByFirstName("bob").get(0);
         assert expecterCustomer.equals(returnedCustomer);
 
-        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("zach"));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomersByFirstName("zach"));
     }
 
     @Test
@@ -60,9 +61,11 @@ public class CustomerLogicTest {
 
     @Test
     void getCustomersAtTableTest(){
-        Optional<List<Customer>> expected =
-                customerLogic.getCustomersAtTable(1);
-
+        Optional<List<Customer>> returnedCustomers = customerLogic.getCustomersAtTable(1);
+        assert(returnedCustomers.isPresent());
+        assert(returnedCustomers.get().size() == 2);
+        assert(returnedCustomers.get().get(0).getFirstName().equals("alice"));
+        assert(returnedCustomers.get().get(1).getFirstName().equals("dave"));
 
     }
 }

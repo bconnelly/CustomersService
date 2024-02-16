@@ -38,9 +38,9 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@GetMapping(path = "/getCustomerByFirstName")
-	public ResponseEntity<Customer> getCustomerByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+	public ResponseEntity<List<Customer>> getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
 		log.debug("getCustomerByFirstName requested");
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomerByFirstName(firstName));
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomersByFirstName(firstName));
 	}
 
 	@GetMapping(path = "/customerExists")

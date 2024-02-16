@@ -27,8 +27,8 @@ public class CustomerLogic {
         return customerRepository.existsByFirstName(firstName);
     }
 
-    public Customer getCustomerByFirstName(String firstName) throws EntityNotFoundException {
-        Optional<Customer> ret = customerRepository.getCustomerByFirstName(firstName);
+    public List<Customer> getCustomersByFirstName(String firstName) throws EntityNotFoundException {
+        Optional<List<Customer>> ret = customerRepository.getCustomersByFirstName(firstName);
         if(ret.isEmpty()) throw new EntityNotFoundException("customer not found");
         else return ret.get();
     }

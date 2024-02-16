@@ -11,7 +11,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     List<Customer> findAll();
     Optional<List<Customer>> getCustomersByTableNumber(Integer tableNumber);
-    Optional<Customer> getCustomerByFirstName(String firstName);
+    Optional<List<Customer>> getCustomersByFirstName(String firstName);
     @Transactional
     void deleteByFirstName(String firstName);
     boolean existsByFirstName(String firstName);
