@@ -6,16 +6,18 @@ import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
-import java.util.Optional;
-
 
 @SpringBootTest
+//@DataJpaTest
+@Sql("classpath:clean.sql")
 public class CustomerLogicTest {
 
     @Autowired
     private CustomerLogic customerLogic;
+
 
     @Test
     void getAllCustomersTest(){
@@ -42,9 +44,10 @@ public class CustomerLogicTest {
         assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomersByFirstName("zach"));
     }
 
+
     @Test
     void insertCustomerTest() {
-        Customer customerToSave = Customer.builder().firstName("alice").address("test address1")
+        Customer customerToSave = Customer.builder().firstName("chad").address("test address1")
                 .cash(12.34f).tableNumber(1).build();
 
         Customer returnedCustomer = customerLogic.insertCustomer(
@@ -60,12 +63,12 @@ public class CustomerLogicTest {
     }
 
     @Test
-    void getCustomersAtTableTest(){
-        Optional<List<Customer>> returnedCustomers = customerLogic.getCustomersAtTable(1);
-        assert(returnedCustomers.isPresent());
-        assert(returnedCustomers.get().size() == 2);
-        assert(returnedCustomers.get().get(0).getFirstName().equals("alice"));
-        assert(returnedCustomers.get().get(1).getFirstName().equals("dave"));
+    void getCustomersAtTableTest() throws EntityNotFoundException {
+        List<Customer> returnedCustomers = customerLogic.getCustomersAtTable(1);
+        assert(!returnedCustomers.isEmpty());
+        assert(returnedCustomers.size() == 2);
+        assert(returnedCustomers.get(0).getFirstName().equals("alice"));
+        assert(returnedCustomers.get(1).getFirstName().equals("dave"));
 
     }
 }

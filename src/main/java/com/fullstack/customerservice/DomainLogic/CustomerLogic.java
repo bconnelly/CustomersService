@@ -29,7 +29,7 @@ public class CustomerLogic {
 
     public List<Customer> getCustomersByFirstName(String firstName) throws EntityNotFoundException {
         Optional<List<Customer>> ret = customerRepository.getCustomersByFirstName(firstName);
-        if(ret.isEmpty()) throw new EntityNotFoundException("customer not found");
+        if(ret.isEmpty() || ret.get().isEmpty()) throw new EntityNotFoundException("customer not found");
         else return ret.get();
     }
 
@@ -46,7 +46,9 @@ public class CustomerLogic {
         return !customerRepository.existsByFirstName(firstName);
     }
 
-    public Optional<List<Customer>> getCustomersAtTable(Integer tableNumber){
-        return customerRepository.getCustomersByTableNumber(tableNumber);
+    public List<Customer> getCustomersAtTable(Integer tableNumber) throws EntityNotFoundException {
+        Optional<List<Customer>> customers = customerRepository.getCustomersByTableNumber(tableNumber);
+        if(customers.isEmpty() || customers.get().isEmpty()) throw new EntityNotFoundException("no customers at table " + tableNumber);
+        return customers.get();
     }
 }

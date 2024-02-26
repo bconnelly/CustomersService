@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 /*
 api returns response entities with a customer or list of customers and an HTTP status.
@@ -64,11 +63,8 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@GetMapping(path = "/getCustomerAtTable")
-	public ResponseEntity<List<Customer>> getCustomerAtTable(@RequestParam(value = "tableNumber") Integer tableNumber){
-		Optional<List<Customer>> customersReturned;
-		customersReturned = customerLogic.getCustomersAtTable(tableNumber);
-		return customersReturned.map(customers -> ResponseEntity.status(HttpStatus.OK).body(customers)).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+	public ResponseEntity<List<Customer>> getCustomerAtTable(@RequestParam(value = "tableNumber") Integer tableNumber) throws EntityNotFoundException {
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomersAtTable(tableNumber));
 	}
 
 }
-//
