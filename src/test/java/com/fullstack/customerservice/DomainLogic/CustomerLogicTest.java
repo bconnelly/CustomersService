@@ -21,13 +21,27 @@ public class CustomerLogicTest {
 
 
     @Test
-    void getAllCustomersTest(){
+    void bootByFirstNameTest() throws EntityNotFoundException {
+        assert(customerLogic.bootByFirstName("ed"));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
+    }
+
+    @Test
+    void getAllCustomersTest() throws EntityNotFoundException {
         List<Customer> returnedCustomers = customerLogic.getAllCustomers();
-        assert(returnedCustomers.get(0).getFirstName().equals("alice"));
-        assert(returnedCustomers.get(1).getFirstName().equals("bob"));
-        assert(returnedCustomers.get(2).getFirstName().equals("chuck"));
-        assert(returnedCustomers.get(3).getFirstName().equals("dave"));
-        assert(returnedCustomers.get(4).getFirstName().equals("ed"));
+        assert (returnedCustomers.get(0).getFirstName().equals("alice"));
+        assert (returnedCustomers.get(1).getFirstName().equals("bob"));
+        assert (returnedCustomers.get(2).getFirstName().equals("chuck"));
+        assert (returnedCustomers.get(3).getFirstName().equals("dave"));
+        assert (returnedCustomers.get(4).getFirstName().equals("ed"));
+
+        customerLogic.bootByFirstName("alice");
+        customerLogic.bootByFirstName("bob");
+        customerLogic.bootByFirstName("chuck");
+        customerLogic.bootByFirstName("dave");
+        customerLogic.bootByFirstName("ed");
+
+        assert (customerLogic.getAllCustomers().isEmpty());
     }
 
     @Test
@@ -58,12 +72,6 @@ public class CustomerLogicTest {
 
         assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(customerToSave.getFirstName()
                 , customerToSave.getAddress(), customerToSave.getCash(), customerToSave.getTableNumber()));
-    }
-
-    @Test
-    void bootByFirstNameTest() throws EntityNotFoundException {
-        assert(customerLogic.bootByFirstName("ed"));
-        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
     }
 
     @Test
