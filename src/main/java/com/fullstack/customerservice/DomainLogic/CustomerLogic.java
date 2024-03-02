@@ -5,6 +5,7 @@ import com.fullstack.customerservice.Repositories.CustomerRepository;
 import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +15,12 @@ import java.util.Optional;
 @Service
 public class CustomerLogic {
 
-    public CustomerLogic(){}
+    private final CustomerRepository customerRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    public CustomerLogic(CustomerRepository customerRepository){
+        this.customerRepository = customerRepository;
+    }
 
     public List<Customer> getAllCustomers(){
         return customerRepository.findAll();
@@ -27,13 +30,14 @@ public class CustomerLogic {
         return customerRepository.existsByFirstName(firstName);
     }
 
-    public List<Customer> getCustomersByFirstName(String firstName) throws EntityNotFoundException {
-        Optional<List<Customer>> ret = customerRepository.getCustomersByFirstName(firstName);
-        if(ret.isEmpty() || ret.get().isEmpty()) throw new EntityNotFoundException("customer not found");
-        else return ret.get();
+    public Customer getCustomerByFirstName(String firstName) throws EntityNotFoundException {
+        Optional<Customer> customer = customerRepository.getCustomerByFirstName(firstName);
+        if(customer.isEmpty()) throw new EntityNotFoundException("customer not found");
+        else return customer.get();
     }
 
-    public Customer insertCustomer(String firstName, String address, Float cash, Integer tableNumber){
+    public Customer insertCustomer(String firstName, String address, Float cash, Integer tableNumber) {
+        if(customerExists(firstName)) throw new DataIntegrityViolationException("customer already in restaurant");
         Customer newCustomer = Customer.builder()
                 .firstName(firstName).address(address).cash(cash)
                 .tableNumber(tableNumber).build();

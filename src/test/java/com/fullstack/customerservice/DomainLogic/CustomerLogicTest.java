@@ -6,6 +6,7 @@ import com.fullstack.customerservice.Utilities.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -38,10 +39,10 @@ public class CustomerLogicTest {
     @Test
     void getCustomerByFirstNameTest() throws EntityNotFoundException {
         Customer expecterCustomer = Customer.builder().firstName("bob").address("124 main st").tableNumber(3).cash(2.34f).build();
-        Customer returnedCustomer = customerLogic.getCustomersByFirstName("bob").get(0);
+        Customer returnedCustomer = customerLogic.getCustomerByFirstName("bob");
         assert expecterCustomer.equals(returnedCustomer);
 
-        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomersByFirstName("zach"));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("zach"));
     }
 
 
@@ -54,6 +55,9 @@ public class CustomerLogicTest {
                 customerToSave.getFirstName(), customerToSave.getAddress(), 12.34f, 1);
 
         assert(customerToSave.equals(returnedCustomer));
+
+        assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(customerToSave.getFirstName()
+                , customerToSave.getAddress(), customerToSave.getCash(), customerToSave.getTableNumber()));
     }
 
     @Test

@@ -37,9 +37,9 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@GetMapping(path = "/getCustomerByFirstName")
-	public ResponseEntity<List<Customer>> getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+	public ResponseEntity<Customer> getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
 		log.debug("getCustomerByFirstName requested");
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomersByFirstName(firstName));
+		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomerByFirstName(firstName));
 	}
 
 	@GetMapping(path = "/customerExists")
@@ -51,7 +51,8 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	public ResponseEntity<Customer> insertCustomer(@RequestParam(value = "firstName")String firstName,
 												   @RequestParam(value = "address")String address,
 												   @RequestParam(value = "cash")Float cash,
-												   @RequestParam(value = "tableNumber")Integer tableNumber){
+												   @RequestParam(value = "tableNumber")Integer tableNumber) {
+
 
 		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.insertCustomer(firstName, address, cash, tableNumber));
 	}
