@@ -22,7 +22,8 @@ public class CustomerLogicTest {
 
     @Test
     void bootByFirstNameTest() throws EntityNotFoundException {
-        assert(customerLogic.bootByFirstName("ed"));
+        customerLogic.bootByFirstName("ed");
+        assert(!customerLogic.customerExists("ed"));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
     }
 

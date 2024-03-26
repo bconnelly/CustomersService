@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,42 +28,43 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	@Autowired
 	private CustomerLogic customerLogic;
 
-	@GetMapping(path = "/getAllCustomers")
-	public ResponseEntity<List<Customer>> getAllCustomers(){
+	@GetMapping("/getAllCustomers")
+	public List<Customer> getAllCustomers(){
 		log.debug("getAllCustomers requested");
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getAllCustomers());
+		return customerLogic.getAllCustomers();
 	}
 
-	@GetMapping(path = "/getCustomerByFirstName")
-	public ResponseEntity<Customer> getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+	@GetMapping("/getCustomerByFirstName")
+	public Customer getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
 		log.debug("getCustomerByFirstName requested");
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomerByFirstName(firstName));
+		return customerLogic.getCustomerByFirstName(firstName);
 	}
 
-	@GetMapping(path = "/customerExists")
-	public ResponseEntity<Boolean> customerExists(@RequestParam("firstName") String firstName){
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.customerExists(firstName));
+	@GetMapping("/customerExists")
+	public Boolean customerExists(@RequestParam("firstName") String firstName){
+		log.debug("customerExists requested");
+		return customerLogic.customerExists(firstName);
 	}
 
-	@PostMapping(path = "/insertCustomer")
-	public ResponseEntity<Customer> insertCustomer(@RequestParam(value = "firstName")String firstName,
-												   @RequestParam(value = "address")String address,
-												   @RequestParam(value = "cash")Float cash,
-												   @RequestParam(value = "tableNumber")Integer tableNumber) {
-
-
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.insertCustomer(firstName, address, cash, tableNumber));
+	@PostMapping("/insertCustomer")
+	public Customer insertCustomer(@RequestParam("firstName")String firstName,
+												   @RequestParam("address")String address,
+												   @RequestParam("cash")Float cash,
+												   @RequestParam("tableNumber")Integer tableNumber) {
+		log.debug("insertCustomer requested");
+		return customerLogic.insertCustomer(firstName, address, cash, tableNumber);
 	}
 
-	@PostMapping(path = "/bootCustomer")
-	public ResponseEntity<Customer> bootCustomer(@RequestParam(value = "firstName") String firstName) throws EntityNotFoundException {
-			if(customerLogic.bootByFirstName(firstName)) return ResponseEntity.status(HttpStatus.OK).body(null);
-			else throw new RuntimeException("Entity still exists after deletion attempt");
+	@PostMapping("/bootCustomer")
+	public void bootCustomer(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+		log.debug("bootCustomer requested");
+		customerLogic.bootByFirstName(firstName);
 	}
 
-	@GetMapping(path = "/getCustomerAtTable")
-	public ResponseEntity<List<Customer>> getCustomerAtTable(@RequestParam(value = "tableNumber") Integer tableNumber) throws EntityNotFoundException {
-		return ResponseEntity.status(HttpStatus.OK).body(customerLogic.getCustomersAtTable(tableNumber));
+	@GetMapping("/getCustomerAtTable")
+	public List<Customer> getCustomerAtTable(@RequestParam("tableNumber") Integer tableNumber) throws EntityNotFoundException {
+		log.debug("getCustomerAtTable requested");
+		return customerLogic.getCustomersAtTable(tableNumber);
 	}
 
 }

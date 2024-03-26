@@ -44,10 +44,9 @@ public class CustomerLogic {
         return customerRepository.save(newCustomer);
     }
 
-    public boolean bootByFirstName(String firstName) throws EntityNotFoundException {
+    public void bootByFirstName(String firstName) throws EntityNotFoundException {
         if(!customerRepository.existsByFirstName(firstName)) throw new EntityNotFoundException("customer not found");
         customerRepository.deleteByFirstName(firstName);
-        return !customerRepository.existsByFirstName(firstName);
     }
 
     public List<Customer> getCustomersAtTable(Integer tableNumber) throws EntityNotFoundException {

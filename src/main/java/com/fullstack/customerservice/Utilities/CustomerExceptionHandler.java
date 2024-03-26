@@ -2,25 +2,29 @@ package com.fullstack.customerservice.Utilities;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
 public class CustomerExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> entityNotFoundHandler(EntityNotFoundException exception){
+    public String entityNotFoundHandler(EntityNotFoundException exception){
         log.error(exception.getCause() + ", " + exception.getMessage());
-        if(exception.getMessage().isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("entity not found");
-        else return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getCause() + ", entity not found | " + exception.getMessage());
+        return exception.getCause() + ", entity not found | " + exception.getMessage();
     }
 
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> exceptionHandler(Exception exception){
+    public String exceptionHandler(Exception exception){
         log.error(exception.getCause() + ", " + exception.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getCause() + ", " + exception.getMessage());
+        return exception.getCause() + ", " + exception.getMessage();
     }
 }
