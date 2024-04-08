@@ -7,13 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 
 @SpringBootTest
-//@DataJpaTest
-@Sql("classpath:clean.sql")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerLogicTest {
 
     @Autowired
@@ -41,6 +40,8 @@ public class CustomerLogicTest {
         customerLogic.bootByFirstName("chuck");
         customerLogic.bootByFirstName("dave");
         customerLogic.bootByFirstName("ed");
+        customerLogic.bootByFirstName("fred");
+        customerLogic.bootByFirstName("george");
 
         assert (customerLogic.getAllCustomers().isEmpty());
     }
