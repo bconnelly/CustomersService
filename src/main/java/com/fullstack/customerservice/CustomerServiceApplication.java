@@ -35,36 +35,32 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	}
 
 	@GetMapping("/getCustomerByFirstName")
-	public Customer getCustomersByFirstName(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+	public Customer getCustomersByFirstName(String firstName) throws EntityNotFoundException {
 		log.debug("getCustomerByFirstName requested");
 		return customerLogic.getCustomerByFirstName(firstName);
 	}
 
 	@GetMapping("/customerExists")
-	public Boolean customerExists(@RequestParam("firstName") String firstName){
+	public Boolean customerExists(String firstName){
 		log.debug("customerExists requested");
 		return customerLogic.customerExists(firstName);
 	}
 
 	@PostMapping("/insertCustomer")
-	public Customer insertCustomer(@RequestParam("firstName")String firstName,
-												   @RequestParam("address")String address,
-												   @RequestParam("cash")Float cash,
-												   @RequestParam("tableNumber")Integer tableNumber) {
+	public Customer insertCustomer(@RequestBody Customer customer) {
 		log.debug("insertCustomer requested");
-		return customerLogic.insertCustomer(firstName, address, cash, tableNumber);
+		return customerLogic.insertCustomer(customer);
 	}
 
 	@PostMapping("/bootCustomer")
-	public void bootCustomer(@RequestParam("firstName") String firstName) throws EntityNotFoundException {
+	public void bootCustomer(String firstName) throws EntityNotFoundException {
 		log.debug("bootCustomer requested");
 		customerLogic.bootByFirstName(firstName);
 	}
 
 	@GetMapping("/getCustomerAtTable")
-	public List<Customer> getCustomerAtTable(@RequestParam("tableNumber") Integer tableNumber) throws EntityNotFoundException {
+	public List<Customer> getCustomerAtTable(Integer tableNumber) throws EntityNotFoundException {
 		log.debug("getCustomerAtTable requested");
 		return customerLogic.getCustomersAtTable(tableNumber);
 	}
-
 }

@@ -36,12 +36,9 @@ public class CustomerLogic {
         else return customer.get();
     }
 
-    public Customer insertCustomer(String firstName, String address, Float cash, Integer tableNumber) {
-        if(customerExists(firstName)) throw new DataIntegrityViolationException("customer already in restaurant");
-        Customer newCustomer = Customer.builder()
-                .firstName(firstName).address(address).cash(cash)
-                .tableNumber(tableNumber).build();
-        return customerRepository.save(newCustomer);
+    public Customer insertCustomer(Customer customer){
+        if(customerExists(customer.getFirstName())) throw new DataIntegrityViolationException("customer already in restaurant");
+        return customerRepository.save(customer);
     }
 
     public void bootByFirstName(String firstName) throws EntityNotFoundException {

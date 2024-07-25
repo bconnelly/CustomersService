@@ -67,13 +67,11 @@ public class CustomerLogicTest {
         Customer customerToSave = Customer.builder().firstName("chad").address("test address1")
                 .cash(12.34f).tableNumber(1).build();
 
-        Customer returnedCustomer = customerLogic.insertCustomer(
-                customerToSave.getFirstName(), customerToSave.getAddress(), 12.34f, 1);
+        Customer returnedCustomer = customerLogic.insertCustomer(customerToSave);
 
         assert(customerToSave.equals(returnedCustomer));
 
-        assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(customerToSave.getFirstName()
-                , customerToSave.getAddress(), customerToSave.getCash(), customerToSave.getTableNumber()));
+        assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(customerToSave));
     }
 
     @Test
