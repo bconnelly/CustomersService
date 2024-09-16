@@ -37,6 +37,7 @@ public class CustomerLogic {
     }
 
     public Customer insertCustomer(Customer customer){
+        if(customer == null) throw new DataIntegrityViolationException("customer cannot be null");
         if(customerExists(customer.getFirstName())) throw new DataIntegrityViolationException("customer already in restaurant");
         return customerRepository.save(customer);
     }

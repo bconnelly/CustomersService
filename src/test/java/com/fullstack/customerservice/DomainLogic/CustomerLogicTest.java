@@ -27,6 +27,13 @@ public class CustomerLogicTest {
     }
 
     @Test
+    void bootByFirstNameBadName() {
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName(""));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName(null));
+    }
+
+    @Test
     void getAllCustomersTest() throws EntityNotFoundException {
         List<Customer> returnedCustomers = customerLogic.getAllCustomers();
         assert (returnedCustomers.get(0).getFirstName().equals("alice"));
@@ -49,7 +56,13 @@ public class CustomerLogicTest {
     @Test
     void customerExistsTest(){
         assert customerLogic.customerExists("chuck");
+    }
+
+    @Test
+    void customerExistsBadNames(){
         assert !customerLogic.customerExists("zach");
+        assert !customerLogic.customerExists("");
+        assert !customerLogic.customerExists(null);
     }
 
     @Test
@@ -57,21 +70,27 @@ public class CustomerLogicTest {
         Customer expecterCustomer = Customer.builder().firstName("bob").address("124 main st").tableNumber(3).cash(2.34f).build();
         Customer returnedCustomer = customerLogic.getCustomerByFirstName("bob");
         assert expecterCustomer.equals(returnedCustomer);
-
-        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("zach"));
     }
 
+    @Test
+    void getCustomerByFirstNameBadNames(){
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName(""));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName(null));
+        assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("fakename"));
+    }
 
     @Test
     void insertCustomerTest() {
         Customer customerToSave = Customer.builder().firstName("chad").address("test address1")
                 .cash(12.34f).tableNumber(1).build();
-
         Customer returnedCustomer = customerLogic.insertCustomer(customerToSave);
-
         assert(customerToSave.equals(returnedCustomer));
-
         assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(customerToSave));
+    }
+
+    @Test
+    void insertCustomerBadInputs(){
+        assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(null));
     }
 
     @Test
