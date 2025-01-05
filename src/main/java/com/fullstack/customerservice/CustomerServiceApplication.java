@@ -13,10 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/*
-api returns response entities with a customer or list of customers and an HTTP status.
-customer is null in the case of an error
-*/
 @Slf4j
 @EnableTransactionManagement
 @RestController
@@ -50,6 +46,12 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	public Customer insertCustomer(@RequestBody Customer customer) {
 		log.debug("insertCustomer requested");
 		return customerLogic.insertCustomer(customer);
+	}
+
+	@PostMapping("/insertGroup")
+	public void insertGroup(@RequestBody List<Customer> customers) {
+		log.debug("insertGroup requested");
+		customerLogic.insertGroup(customers);
 	}
 
 	@PostMapping("/bootCustomer")

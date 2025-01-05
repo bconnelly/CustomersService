@@ -42,6 +42,15 @@ public class CustomerLogic {
         return customerRepository.save(customer);
     }
 
+    public void insertGroup(List<Customer> customers) {
+        if(customers == null || customers.isEmpty()) throw new DataIntegrityViolationException("customer group cannot be null or empty");
+        for(Customer customer : customers) {
+            if(customerExists(customer.getFirstName())) throw new DataIntegrityViolationException("customer already in restaurant");
+        }
+
+        customerRepository.saveAll(customers);
+    }
+
     public void bootByFirstName(String firstName) throws EntityNotFoundException {
         if(!customerRepository.existsByFirstName(firstName)) throw new EntityNotFoundException("customer not found");
         customerRepository.deleteByFirstName(firstName);

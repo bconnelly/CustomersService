@@ -13,18 +13,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(EntityNotFoundException.class)
-    public String entityNotFoundHandler(EntityNotFoundException exception){
-        log.error(exception.getCause() + ", " + exception.getMessage());
-        return exception.getCause() + ", entity not found | " + exception.getMessage();
-    }
-
-    @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public String exceptionHandler(Exception exception){
-        log.error(exception.getCause() + ", " + exception.getMessage());
+        log.error("{}, {}", exception.getCause(), exception.getMessage());
         return exception.getCause() + ", " + exception.getMessage();
     }
 }
