@@ -3,11 +3,9 @@ package com.fullstack.customerservice;
 import com.fullstack.customerservice.DBAccessEntities.Customer;
 import com.fullstack.customerservice.DomainLogic.CustomerLogic;
 import com.fullstack.customerservice.Utilities.EntityNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Collections;
@@ -23,58 +21,70 @@ public class CustomerServiceApplicationTests {
     private CustomerServiceApplication application;
 
     @Mock
-    private CustomerLogic customerLogic;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    private CustomerLogic customerLogicMock;
 
     @Test
     public void testGetAllCustomers() {
-        when(customerLogic.getAllCustomers()).thenReturn(Collections.singletonList(new Customer()));
-        List<Customer> response = application.getAllCustomers();
-        assertEquals(1, response.size());
+        when(customerLogicMock.getAllCustomers()).thenReturn(Collections.singletonList(new Customer()));
 
+        List<Customer> response = application.getAllCustomers();
+
+        assertEquals(1, response.size());
+        verify(customerLogicMock, times(1)).getAllCustomers();
     }
 
     @Test
     public void testGetCustomerByFirstName() throws EntityNotFoundException {
         String firstName = "John";
         Customer customer = new Customer();
-        when(customerLogic.getCustomerByFirstName(firstName)).thenReturn(customer);
+        when(customerLogicMock.getCustomerByFirstName(firstName)).thenReturn(customer);
+
         Customer response = application.getCustomersByFirstName(firstName);
+
         assertEquals(customer, response);
+        verify(customerLogicMock, times(1)).getCustomerByFirstName(firstName);
     }
 
     @Test
     public void testCustomerExists() {
         String firstName = "John";
-        when(customerLogic.customerExists(firstName)).thenReturn(true);
+        when(customerLogicMock.customerExists(firstName)).thenReturn(true);
+
         Boolean response = application.customerExists(firstName);
+
         assertEquals(true, response);
+        verify(customerLogicMock, times(1)).customerExists(firstName);
     }
 
     @Test
     public void testInsertCustomer() {
         Customer customer = new Customer();
-        when(customerLogic.insertCustomer(customer)).thenReturn(customer);
+        when(customerLogicMock.insertCustomer(customer)).thenReturn(customer);
+
         Customer response = application.insertCustomer(customer);
+
         assertEquals(customer, response);
+        verify(customerLogicMock, times(1)).insertCustomer(customer);
     }
 
     @Test
     public void testBootCustomer() throws EntityNotFoundException {
         String firstName = "John";
-        when(customerLogic.customerExists(firstName)).thenReturn(true);
+        doNothing().when(customerLogicMock).bootByFirstName(firstName);
+
         application.bootCustomer(firstName);
+
+        verify(customerLogicMock, times(1)).bootByFirstName(firstName);
     }
 
     @Test
-    public void testGetCustomerAtTable() throws EntityNotFoundException {
+    public void testGetCustomersAtTable() throws EntityNotFoundException {
         Integer tableNumber = 1;
-        when(customerLogic.getCustomersAtTable(tableNumber)).thenReturn(Collections.singletonList(new Customer()));
-        List<Customer> response = application.getCustomerAtTable(tableNumber);
+        when(customerLogicMock.getCustomersAtTable(tableNumber)).thenReturn(Collections.singletonList(new Customer()));
+
+        List<Customer> response = application.getCustomersAtTable(tableNumber);
+
         assertEquals(1, response.size());
+        verify(customerLogicMock, times(1)).getCustomersAtTable(tableNumber);
     }
 }

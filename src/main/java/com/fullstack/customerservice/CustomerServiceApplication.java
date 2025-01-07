@@ -60,8 +60,8 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 		customerLogic.bootByFirstName(firstName);
 	}
 
-	@GetMapping("/getCustomerAtTable")
-	public List<Customer> getCustomerAtTable(Integer tableNumber) throws EntityNotFoundException {
+	@GetMapping("/getCustomersAtTable")
+	public List<Customer> getCustomersAtTable(Integer tableNumber) throws EntityNotFoundException {
 		log.debug("getCustomerAtTable requested");
 		return customerLogic.getCustomersAtTable(tableNumber);
 	}

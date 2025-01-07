@@ -148,10 +148,10 @@ pipeline{
                     deleteDirs: true,
                     disableDeferredWipeout: true)
 
-            script{
-                sh 'docker rmi bryan949/poc-customers'
-                sh 'docker image prune'
-            }
+            sh '''
+                docker rmi bryan949/poc-customers
+                docker image prune
+            '''
         }
     }
 }
