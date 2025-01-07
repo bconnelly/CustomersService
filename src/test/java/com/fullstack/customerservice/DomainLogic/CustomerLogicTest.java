@@ -20,21 +20,21 @@ public class CustomerLogicTest {
 
 
     @Test
-    void bootByFirstNameTest() throws EntityNotFoundException {
+    void testBootByFirstName() throws EntityNotFoundException {
         customerLogic.bootByFirstName("ed");
         assert(!customerLogic.customerExists("ed"));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
     }
 
     @Test
-    void bootByFirstNameBadName() {
+    void testBootByFirstNameBadName() {
         assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName("zach"));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName(""));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.bootByFirstName(null));
     }
 
     @Test
-    void getAllCustomersTest() throws EntityNotFoundException {
+    void testGetAllCustomers() throws EntityNotFoundException {
         List<Customer> returnedCustomers = customerLogic.getAllCustomers();
         assert (returnedCustomers.get(0).getFirstName().equals("alice"));
         assert (returnedCustomers.get(1).getFirstName().equals("bob"));
@@ -54,33 +54,33 @@ public class CustomerLogicTest {
     }
 
     @Test
-    void customerExistsTest(){
+    void testCustomerExists(){
         assert customerLogic.customerExists("chuck");
     }
 
     @Test
-    void customerExistsBadNames(){
+    void testCustomerExistsBadNames(){
         assert !customerLogic.customerExists("zach");
         assert !customerLogic.customerExists("");
         assert !customerLogic.customerExists(null);
     }
 
     @Test
-    void getCustomerByFirstNameTest() throws EntityNotFoundException {
+    void testGetCustomerByFirstName() throws EntityNotFoundException {
         Customer expecterCustomer = Customer.builder().firstName("bob").address("124 main st").tableNumber(3).cash(2.34f).build();
         Customer returnedCustomer = customerLogic.getCustomerByFirstName("bob");
         assert expecterCustomer.equals(returnedCustomer);
     }
 
     @Test
-    void getCustomerByFirstNameBadNames(){
+    void testGetCustomerByFirstNameBadNames(){
         assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName(""));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName(null));
         assertThrows(EntityNotFoundException.class, () -> customerLogic.getCustomerByFirstName("fakename"));
     }
 
     @Test
-    void insertCustomerTest() {
+    void testInsertCustomer() {
         Customer customerToSave = Customer.builder().firstName("chad").address("test address1")
                 .cash(12.34f).tableNumber(1).build();
         Customer returnedCustomer = customerLogic.insertCustomer(customerToSave);
@@ -89,12 +89,12 @@ public class CustomerLogicTest {
     }
 
     @Test
-    void insertCustomerBadInputs(){
+    void testInsertCustomerBadInputs(){
         assertThrows(DataIntegrityViolationException.class, () -> customerLogic.insertCustomer(null));
     }
 
     @Test
-    void getCustomersAtTableTest() throws EntityNotFoundException {
+    void testGetCustomersAtTableTest() throws EntityNotFoundException {
         List<Customer> returnedCustomers = customerLogic.getCustomersAtTable(1);
         assert(!returnedCustomers.isEmpty());
         assert(returnedCustomers.size() == 2);
