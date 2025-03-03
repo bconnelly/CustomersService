@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17.0.6_10-jdk
+FROM eclipse-temurin:21.0.6_7-jdk
 SHELL ["/bin/bash", "-c"]
 
 ENV TOMCAT_VERSION=11.0.4
