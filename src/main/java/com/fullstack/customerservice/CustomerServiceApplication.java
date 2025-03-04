@@ -24,44 +24,44 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	@Autowired
 	private CustomerLogic customerLogic;
 
-	@GetMapping("/getAllCustomers")
+	@GetMapping("/customer/all")
 	public List<Customer> getAllCustomers(){
 		log.debug("getAllCustomers requested");
 		return customerLogic.getAllCustomers();
 	}
 
-	@GetMapping("/getCustomerByFirstName")
-	public Customer getCustomersByFirstName(String firstName) throws EntityNotFoundException {
+	@GetMapping("/customer/{firstName}")
+	public Customer getCustomersByFirstName(@PathVariable String firstName) throws EntityNotFoundException {
 		log.debug("getCustomerByFirstName requested");
 		return customerLogic.getCustomerByFirstName(firstName);
 	}
 
-	@GetMapping("/customerExists")
-	public Boolean customerExists(String firstName){
+	@GetMapping("/customer/exists/{firstName}")
+	public Boolean customerExists(@PathVariable String firstName){
 		log.debug("customerExists requested");
 		return customerLogic.customerExists(firstName);
 	}
 
-	@PostMapping("/insertCustomer")
+	@PostMapping("/customer")
 	public Customer insertCustomer(@RequestBody Customer customer) {
 		log.debug("insertCustomer requested");
 		return customerLogic.insertCustomer(customer);
 	}
 
-	@PostMapping("/insertGroup")
+	@PostMapping("/customer/group")
 	public void insertGroup(@RequestBody List<Customer> customers) {
 		log.debug("insertGroup requested");
 		customerLogic.insertGroup(customers);
 	}
 
-	@PostMapping("/bootCustomer")
+	@DeleteMapping("/customer")
 	public void bootCustomer(String firstName) throws EntityNotFoundException {
 		log.debug("bootCustomer requested");
 		customerLogic.bootByFirstName(firstName);
 	}
 
-	@GetMapping("/getCustomersAtTable")
-	public List<Customer> getCustomersAtTable(Integer tableNumber) throws EntityNotFoundException {
+	@GetMapping("/customers/table/{tableNumber}")
+	public List<Customer> getCustomersAtTable(@PathVariable Integer tableNumber) throws EntityNotFoundException {
 		log.debug("getCustomerAtTable requested");
 		return customerLogic.getCustomersAtTable(tableNumber);
 	}
