@@ -60,7 +60,7 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 		customerLogic.bootByFirstName(firstName);
 	}
 
-	@GetMapping("/customers/table/{tableNumber}")
+	@GetMapping("/customer/table/{tableNumber}")
 	public List<Customer> getCustomersAtTable(@PathVariable Integer tableNumber) throws EntityNotFoundException {
 		log.debug("getCustomerAtTable requested");
 		return customerLogic.getCustomersAtTable(tableNumber);
