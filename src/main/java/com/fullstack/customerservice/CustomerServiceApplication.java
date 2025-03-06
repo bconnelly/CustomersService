@@ -54,8 +54,8 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 		customerLogic.insertGroup(customers);
 	}
 
-	@DeleteMapping("/customer")
-	public void bootCustomer(String firstName) throws EntityNotFoundException {
+	@DeleteMapping("/customer/{firstName}")
+	public void bootCustomer(@PathVariable String firstName) throws EntityNotFoundException {
 		log.debug("bootCustomer requested");
 		customerLogic.bootByFirstName(firstName);
 	}
