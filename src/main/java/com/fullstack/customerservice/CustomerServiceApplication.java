@@ -24,6 +24,11 @@ public class CustomerServiceApplication extends SpringBootServletInitializer {
 	@Autowired
 	private CustomerLogic customerLogic;
 
+	@GetMapping("/")
+	public String index() {
+		return "default customer service landing page";
+	}
+
 	@GetMapping("/customer/all")
 	public List<Customer> getAllCustomers(){
 		log.debug("getAllCustomers requested");
