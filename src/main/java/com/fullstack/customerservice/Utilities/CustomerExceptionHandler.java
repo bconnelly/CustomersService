@@ -17,7 +17,7 @@ public class CustomerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public String entityNotFoundexceptionHandler(EntityNotFoundException exception){
         log.error(String.format("Exception: %s, message: %s", exception.getCause(), exception.getMessage()));
-        return exception.getCause() + ", entity not found | " + exception.getMessage();
+        return String.format("'%s': entity not found", exception.getCause());
     }
 
     @ResponseBody
@@ -25,6 +25,6 @@ public class CustomerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public String exceptionHandler(Exception exception){
         log.error(String.format("Exception: %s, message: %s", exception.getCause(), exception.getMessage()));
-        return exception.getCause() + ", " + exception.getMessage();
+        return String.valueOf(exception.getCause());
     }
 }

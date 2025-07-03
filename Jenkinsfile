@@ -15,7 +15,7 @@ pipeline{
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
     }
     stages{
-        stage('maven build and test, docker build and push'){
+        stage('maven build and test'){
             steps{
                 sh '''
                     mvn verify
@@ -24,7 +24,7 @@ pipeline{
 
             }
         }
-        stage('build docker images'){
+        stage('build and push docker image'){
             steps{
                 unstash 'customers-repo'
                 sh '''
