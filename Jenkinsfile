@@ -10,16 +10,35 @@ pipeline{
             alwaysPull true
         }
     }
+    options{
+        skipDefaultCheckout()
+    }
     environment{
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
     }
     stages{
-        stage('maven build and test'){
+        stage("Checkout and store rollback variables"){
+            steps {
+                checkout scm
+                script {
+                    // Save the current master commit SHA
+                    env.MASTER_COMMIT = sh(script: 'git rev-parse origin/master', returnStdout: true).trim()
+
+                    // Save the current short SHA of the checked-out commit (HEAD)
+                    env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+
+                    // Save the current image digest of the latest pushed Docker image
+                    env.PREV_IMAGE = sh(script: '''
+                        docker pull bryan949/poc-customers:latest || true
+                        docker inspect --format='{{index .RepoDigests 0}}' bryan949/poc-customers:latest || echo "none"
+                    ''', returnStdout: true).trim()
+                }
+            }
+        }
+        stage('Maven build and test'){
             steps{
-                sh '''
-                    mvn verify
-                '''
+                sh 'mvn verify'
                 stash name: 'customers-repo', useDefaultExcludes: false
 
             }
@@ -139,19 +158,24 @@ pipeline{
             }
         }
         always{
-            cleanWs(cleanWhenAborted: true,
-                    cleanWhenFailure: true,
-                    cleanWhenNotBuilt: true,
-                    cleanWhenSuccess: true,
-                    cleanWhenUnstable: true,
-                    cleanupMatrixParent: true,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true)
+            script{
+                if (getContext(hudson.FilePath)) {
+                    cleanWs(cleanWhenAborted: true,
+                            cleanWhenFailure: true,
+                            cleanWhenNotBuilt: true,
+                            cleanWhenSuccess: true,
+                            cleanWhenUnstable: true,
+                            cleanupMatrixParent: true,
+                            deleteDirs: true,
+                            disableDeferredWipeout: true)
 
-            sh '''
-                docker rmi bryan949/poc-customers
-                docker image prune
-            '''
+                    sh '''
+                        docker rmi bryan949/poc-customers
+                        docker image prune
+                    '''
+                }
+            }
+
         }
     }
 }
