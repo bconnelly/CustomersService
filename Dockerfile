@@ -9,7 +9,7 @@ ARG TOMCAT_PASS
 RUN useradd -m -U -d /opt/tomcat -s /bin/false tomcat
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-11/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz && \
     tar -xf apache-tomcat-$TOMCAT_VERSION.tar.gz -C /opt/tomcat && \
-    rm apache-tomcat-$TOMCAT_VERSION.tar.gz && \
+    rm apache-tomcat-$TOMCAT_VERSION.tar.gz
 
 RUN ln -s /opt/tomcat/apache-tomcat-$TOMCAT_VERSION /opt/tomcat/latest
 
