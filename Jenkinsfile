@@ -54,8 +54,8 @@ pipeline{
                             cp "$TOMCAT_CONTEXT_XML" ./context.xml
 
                             docker build \
-                             --build-arg TOMCAT_USER=${TOMCAT_USER} \
-                             --build-arg TOMCAT_PASS=${TOMCAT_PASS} \
+                             --build-arg TOMCAT_USER=$TOMCAT_USER \
+                             --build-arg TOMCAT_PASS=$TOMCAT_PASS \
                              -t bryan949/poc-customers:${GIT_SHA} .
                             docker tag bryan949/poc-customers:${GIT_SHA} bryan949/poc-customers:latest
                             docker push bryan949/poc-customers:${GIT_SHA}
@@ -80,9 +80,9 @@ pipeline{
                     git clone https://github.com/bconnelly/Restaurant-k8s-components.git
 
                     find Restaurant-k8s-components -type f -path ./Restaurant-k8s-components/customers -prune -o -name *.yaml -print | while read line; do yq -i '.metadata.namespace = "rc"' $line > /dev/null; done
-                    yq -i '.metadata.namespace = "rc"' /root/jenkins/restaurant-resources/poc-secrets.yaml > /dev/null
-                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/poc-config.yaml > /dev/null
-                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/mysql-external-service.yaml > /dev/null
+                    yq -i '.metadata.namespace = "rc"' /root/jenkins/restaurant-resources/poc-secrets.yaml
+                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/poc-config.yaml
+                    yq -i '.metadata.namespace = "rc"' Restaurant-k8s-components/mysql-external-service.yaml
 
                     kubectl apply -f /root/jenkins/restaurant-resources/poc-secrets.yaml
                     kubectl apply -f Restaurant-k8s-components/customers
@@ -131,9 +131,12 @@ pipeline{
                     yq -i '.metadata.namespace = "prod"' Restaurant-k8s-components/mysql-external-service.yaml > /dev/null
 
                     kubectl config set-context --current --namespace prod
+
                     kubectl apply -f /root/jenkins/restaurant-resources/poc-secrets.yaml
+
                     kubectl apply -f Restaurant-k8s-components/customers/
-                    kubectl apply -f Restaurant-k8s-components/{poc-config.yaml,mysql-external-service.yaml}
+                    kubectl apply -f Restaurant-k8s-components/poc-config.yaml
+                    kubectl apply -f Restaurant-k8s-components/mysql-external-service.yaml
 
                     kubectl rollout restart deployment customers-deployment
 
