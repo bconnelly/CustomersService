@@ -10,57 +10,62 @@ pipeline{
             alwaysPull true
         }
     }
-    options{
-        skipDefaultCheckout()
-    }
     environment{
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        TOMCAT_USER = credentials('TOMCAT_USER')
+        TOMCAT_PASS = credentials('TOMCAT_PASS')
     }
     stages{
-        stage("Checkout and store rollback variables"){
+        stage("Maven build and test"){
             steps {
-                checkout scm
-                script {
-                    // Save the current master commit SHA
-                    env.MASTER_COMMIT = sh(script: 'git rev-parse origin/master', returnStdout: true).trim()
+                dir('CustomersService'){                
+                    script {
+                        git url: "${CUSTOMER_REPO}"
+                        env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                        env.MASTER_COMMIT = sh(script: 'git rev-parse master', returnStdout: true).trim()
+                        env.PREV_IMAGE = sh(script: '''
+                                                    docker pull bryan949/poc-customer:latest >> /dev/null
+                                                    docker inspect --format='{{index .RepoDigests 0}}' bryan949/poc-customer:latest
+                                                    ''', returnStdout: true).trim()
+                    }
+                }
 
-                    // Save the current short SHA of the checked-out commit (HEAD)
-                    env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                echo "MASTER_COMMIT: ${env.MASTER_COMMIT}"
+                echo "GIT_SHA: ${env.GIT_SHA}"
+                echo "PREV_IMAGE: ${env.PREV_IMAGE}"
 
-                    // Save the current image digest of the latest pushed Docker image
-                    env.PREV_IMAGE = sh(script: '''
-                        docker pull bryan949/poc-customers:latest || true
-                        docker inspect --format='{{index .RepoDigests 0}}' bryan949/poc-customers:latest || echo "none"
-                    ''', returnStdout: true).trim()
+                sh '''
+                    mvn verify
+                   '''
+                stash name: 'customers-repo', useDefaultExcludes: false
+            }
+        }
+        stage('Build and push docker image'){
+            steps{
+                dir('docker-build'){
+                    unstash 'customers-repo'
+                    withCredentials([
+                        file(credentialsId: 'TOMCAT_SERVER_XML', variable: 'TOMCAT_SERVER_XML'),
+                        file(credentialsId: 'TOMCAT_CONTEXT_XML', variable: 'TOMCAT_CONTEXT_XML')
+                    ]) {
+                        sh '''
+                            cp "$TOMCAT_SERVER_XML" ./server.xml
+                            cp "$TOMCAT_CONTEXT_XML" ./context.xml
+
+                            docker build \
+                             --build-arg TOMCAT_USER=${TOMCAT_USER} \
+                             --build-arg TOMCAT_PASS=${TOMCAT_PASS} \
+                             -t bryan949/poc-customers:${GIT_SHA} .
+                            docker tag bryan949/poc-customers:${GIT_SHA} bryan949/poc-customers:latest
+                            docker push bryan949/poc-customers:${GIT_SHA}
+                            docker push bryan949/poc-customers:latest
+                        '''
+                    }
                 }
             }
         }
-        stage('Maven build and test'){
-            steps{
-                sh 'mvn verify'
-                stash name: 'customers-repo', useDefaultExcludes: false
-
-            }
-        }
-        stage('build and push docker image'){
-            steps{
-                unstash 'customers-repo'
-                sh '''
-                    cp /root/jenkins/restaurant-resources/tomcat-users.xml .
-                    cp /root/jenkins/restaurant-resources/context.xml .
-                    cp /root/jenkins/restaurant-resources/server.xml .
-
-                    docker build -t bryan949/poc-customers .
-                    docker push bryan949/poc-customers:latest
-
-                    rm tomcat-users.xml
-                    rm context.xml
-                    rm server.xml
-                '''
-            }
-        }
-        stage('configure cluster connection'){
+        stage('Configure cluster connection'){
             steps{
     	        sh '''
 	                kops export kubecfg --admin --name poc.k8s.local
@@ -69,7 +74,7 @@ pipeline{
 	            '''
             }
         }
-        stage('deploy services to cluster - rc namespace'){
+        stage('Deploy services to cluster - rc'){
             steps{
                 sh '''
                     git clone https://github.com/bconnelly/Restaurant-k8s-components.git
@@ -83,26 +88,25 @@ pipeline{
                     kubectl apply -f Restaurant-k8s-components/customers
                     kubectl apply -f Restaurant-k8s-components/poc-config.yaml
                     kubectl apply -f Restaurant-k8s-components/mysql-external-service.yaml
-                    kubectl get deployment
+
                     kubectl rollout restart deployment customers-deployment
 
                     if [ -z "$(kops validate cluster | grep ".k8s.local is ready")" ]; then echo "failed to deploy to rc namespace" && exit 1; fi
                     sleep 3
                 '''
                 stash includes: 'Restaurant-k8s-components/customers/', name: 'k8s-components'
-                stash includes: 'Restaurant-k8s-components/tests.py,Restaurant-k8s-components/tests.py', name: 'tests'
+                stash includes: 'Restaurant-k8s-components/tests.py', name: 'tests'
             }
         }
-        stage('sanity tests'){
+        stage('Sanity tests'){
             steps{
                 unstash 'tests'
                 sh '''
-                    ls -alF
                     python Restaurant-k8s-components/tests.py ${RC_LB}
-                    exit_status=$?
-                    if [ "${exit_status}" -ne 0 ];
+                    if [ $? -ne 0 ];
                     then
-                        echo "exit ${exit_status}"
+                        echo "Sanity tests failed"
+                        exit 1
                     fi
                 '''
 
@@ -116,7 +120,7 @@ pipeline{
                 }
             }
         }
-        stage('deploy to cluster - prod namespace'){
+        stage('Deploy to cluster - prod'){
             steps{
                 unstash 'k8s-components'
 
@@ -129,9 +133,8 @@ pipeline{
                     kubectl config set-context --current --namespace prod
                     kubectl apply -f /root/jenkins/restaurant-resources/poc-secrets.yaml
                     kubectl apply -f Restaurant-k8s-components/customers/
-                    kubectl apply -f Restaurant-k8s-components/poc-config.yaml
-                    kubectl apply -f Restaurant-k8s-components/mysql-external-service.yaml
-                    kubectl get deployment
+                    kubectl apply -f Restaurant-k8s-components/{poc-config.yaml,mysql-external-service.yaml}
+
                     kubectl rollout restart deployment customers-deployment
 
                     if [ -z "$(kops validate cluster | grep ".k8s.local is ready")" ]; then exit 1; fi
@@ -142,40 +145,42 @@ pipeline{
     }
     post{
         failure{
-            unstash 'customers-repo'
             withCredentials([gitUsernamePassword(credentialsId: 'GITHUB_USERPASS', gitToolName: 'Default')]) {
+                unstash 'customers-repo'
                 sh '''
-                    git checkout rc
+                    echo "Reverting git master branch to previous commit ${MASTER_COMMIT}"
                     git checkout master
-                    git rev-list --left-right master...rc | while read line
-                    do
-                        COMMIT=$(echo $line | sed 's/[^0-9a-f]*//g')
-                        git revert $COMMIT --no-edit
-                    done
-                    git merge rc
-                    git push origin master
+                    git reset --hard ${MASTER_COMMIT}
+                    git push origin master --force
                 '''
             }
+
+            sh '''
+                echo "Rolling back Docker image to previous digest"
+                docker pull ${PREV_IMAGE}
+                docker tag ${PREV_IMAGE} bryan949/poc-customers:latest
+                docker push bryan949/poc-customers:latest
+
+                POD=$(kubectl get pod | grep customer | cut -d ' ' -f 1)
+                kubectl delete pod $POD
+            '''
+
         }
         always{
-            script{
-                if (getContext(hudson.FilePath)) {
-                    cleanWs(cleanWhenAborted: true,
-                            cleanWhenFailure: true,
-                            cleanWhenNotBuilt: true,
-                            cleanWhenSuccess: true,
-                            cleanWhenUnstable: true,
-                            cleanupMatrixParent: true,
-                            deleteDirs: true,
-                            disableDeferredWipeout: true)
+            cleanWs(cleanWhenAborted: true,
+                    cleanWhenFailure: true,
+                    cleanWhenNotBuilt: true,
+                    cleanWhenSuccess: true,
+                    cleanWhenUnstable: true,
+                    cleanupMatrixParent: true,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true)
 
-                    sh '''
-                        docker rmi bryan949/poc-customers
-                        docker image prune
-                    '''
-                }
-            }
-
+            sh '''
+                docker rmi bryan949/poc-customers:${GIT_SHA} || true
+                docker rmi bryan949/poc-customers:latest || true
+                docker image prune -f || true
+            '''
         }
     }
 }
