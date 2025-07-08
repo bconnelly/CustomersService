@@ -19,9 +19,9 @@ pipeline{
     stages{
         stage("Maven build and test"){
             steps {
-                dir('CustomersService'){
+                dir('CustomersService'){                
                     script {
-                        git url: "${CUSTOMERS_REPO}"
+                        git url: "${CUSTOMER_REPO}"
                         env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                         env.MASTER_COMMIT = sh(script: 'git rev-parse master', returnStdout: true).trim()
                         env.PREV_IMAGE = sh(script: '''
