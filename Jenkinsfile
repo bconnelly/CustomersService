@@ -25,8 +25,8 @@ pipeline{
                         env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                         env.MASTER_COMMIT = sh(script: 'git rev-parse master', returnStdout: true).trim()
                         env.PREV_IMAGE = sh(script: '''
-                                                    docker pull bryan949/poc-customers:latest >> /dev/null
-                                                    docker inspect --format='{{index .RepoDigests 0}}' bryan949/poc-customers:latest
+                                                    docker pull bryan949/poc-customer:latest >> /dev/null
+                                                    docker inspect --format='{{index .RepoDigests 0}}' bryan949/poc-customer:latest
                                                     ''', returnStdout: true).trim()
                     }
                 }
