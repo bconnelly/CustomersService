@@ -3,28 +3,17 @@ SHELL ["/bin/bash", "-c"]
 
 ENV TOMCAT_VERSION=11.0.4
 
-ARG TOMCAT_USER
-ARG TOMCAT_PASS
-
 RUN useradd -m -U -d /opt/tomcat -s /bin/false tomcat
 RUN wget https://archive.apache.org/dist/tomcat/tomcat-11/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.tar.gz && \
     tar -xf apache-tomcat-$TOMCAT_VERSION.tar.gz -C /opt/tomcat && \
     rm apache-tomcat-$TOMCAT_VERSION.tar.gz && \
+    chown -R tomcat: /opt/tomcat
 
-RUN ln -s /opt/tomcat/apache-tomcat-$TOMCAT_VERSION /opt/tomcat/latest
+COPY CustomersService.war /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/webapps
+COPY tomcat-users.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/conf
+COPY context.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/webapps/manager/META-INF
+COPY server.xml /opt/tomcat/apache-tomcat-$TOMCAT_VERSION/conf
 
-COPY CustomersService.war /opt/tomcat/latest/webapps
-COPY context.xml /opt/tomcat/latest/webapps/manager/META-INF
-COPY server.xml /opt/tomcat/latest/conf
+HEALTHCHECK --interval=30m --timeout=3s CMD curl --fail http://localhost:80 || exit 1
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-RUN chown -R tomcat: /opt/tomcat && \
-    chmod -R 755 /opt/tomcat
-
-USER tomcat
-
-HEALTHCHECK --interval=30m --timeout=3s CMD curl --fail http://localhost:8080 || exit 1
-
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash", "-c", "/opt/tomcat/apache-tomcat-$TOMCAT_VERSION/bin/catalina.sh run"]
